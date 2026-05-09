@@ -1,228 +1,377 @@
-# 🛍️ AI Shopping Agent
+<div align="center">
 
-A full-stack AI-powered shopping agent that helps users discover and purchase the right products from your Shopify store. Built with React, Node.js/Express, Shopify Storefront API, and Anthropic Claude AI.
+# 🛍️ ShopMind AI
+
+### *Conversational Commerce, Reimagined*
+
+**An AI-powered shopping assistant that transforms Shopify stores into intelligent, chat-driven retail experiences**
+
+<br/>
+
+![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Express](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)
+![Shopify](https://img.shields.io/badge/Shopify-Storefront_API-96BF48?style=for-the-badge&logo=shopify&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-Llama_3.1-F55036?style=for-the-badge&logo=meta&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+
+<br/>
+
+> **ShopMind AI** bridges the gap between conversational AI and e-commerce — letting customers discover products through natural dialogue, get personalized recommendations, and complete purchases seamlessly, all within a single chat interface.
+
+</div>
+
+---
+
+## 📌 Table of Contents
+
+1. [Features](#-features)
+2. [Screenshots](#-screenshots)
+3. [Architecture & Workflow](#-architecture--workflow)
+4. [Tech Stack](#-tech-stack)
+5. [Project Structure](#-project-structure)
+6. [Getting Started](#-getting-started)
+7. [Environment Variables](#-environment-variables)
+8. [Running the App](#-running-the-app)
+9. [AI Chat Workflow](#-ai-chat-workflow)
+10. [Checkout Flow](#-checkout-flow)
+11. [Future Improvements](#-future-improvements)
+12. [Author](#-author)
 
 ---
 
 ## ✨ Features
 
-- **Conversational AI shopping** — Claude AI understands user intent and recommends products intelligently
-- **Deep intent understanding** — Asks clarifying questions instead of dumping a product list
-- **Smart product matching** — Narrows options with reasoning, not just keyword search
-- **Tradeoff handling** — Explicitly surfaces price vs. quality, availability vs. preference decisions
-- **Explained recommendations** — Tells users *why* each product fits their needs
-- **Cart management** — Add/remove items, adjust quantities
-- **Shopify checkout** — Seamless redirect to Shopify's native checkout
-- **Real-time product sync** — Fetches live product data from your Shopify store
+| Feature | Description |
+|---|---|
+| 🤖 **AI Shopping Agent** | Conversational assistant powered by Groq's Llama 3.1 — understands needs, budget, and preferences |
+| 🛒 **Dynamic Product Discovery** | Real-time product fetching from Shopify Storefront API based on AI-parsed user intent |
+| 💬 **Natural Language Interface** | Users describe what they want in plain English; AI handles the rest |
+| 🎯 **Personalized Recommendations** | Context-aware product suggestions filtered by price range, category, and user preferences |
+| 🛍️ **Integrated Cart System** | Add, update, and remove items without leaving the chat experience |
+| 💳 **Multi-Step Checkout Flow** | Smooth, guided checkout: Cart → Shipping → Payment → Review → Confirmation |
+| 📦 **Order Management** | Full order review page and order success confirmation with summary |
+| 🌙 **Responsive Dark UI** | Modern, mobile-first dark interface built for an immersive shopping experience |
+| ⚡ **Low Latency AI** | Groq's ultra-fast inference delivers near-instant AI responses |
+
+---
+
+## 📸 Screenshots
+
+> *Add your screenshots to a `/screenshots` folder and update the paths below.*
+
+<div align="center">
+
+| AI Chat Interface | Product Recommendations |
+|:-:|:-:|
+| ![Chat UI](screenshots/chat-interface.png) | ![Products](screenshots/product-recommendations.png) |
+
+| Cart & Checkout | Order Confirmation |
+|:-:|:-:|
+| ![Cart](screenshots/cart-checkout.png) | ![Order](screenshots/order-success.png) |
+
+</div>
+
+---
+
+## 🏗️ Architecture & Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLIENT (React)                           │
+│                                                                 │
+│   ┌──────────┐    ┌──────────────┐    ┌─────────────────────┐  │
+│   │ Chat UI  │───▶│  Cart State  │───▶│  Checkout Flow UI   │  │
+│   └──────────┘    └──────────────┘    └─────────────────────┘  │
+│         │                                                       │
+└─────────┼───────────────────────────────────────────────────────┘
+          │ HTTP / REST (Axios)
+          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    SERVER (Node.js / Express)                   │
+│                                                                 │
+│   ┌─────────────────┐         ┌──────────────────────────────┐ │
+│   │   /api/chat     │────────▶│       Groq API               │ │
+│   │  (AI Handler)   │◀────────│  (Llama 3.1 — Intent Parse,  │ │
+│   └────────┬────────┘         │   Recommendations, Chat)     │ │
+│            │                  └──────────────────────────────┘ │
+│            ▼                                                    │
+│   ┌─────────────────┐         ┌──────────────────────────────┐ │
+│   │ /api/products   │────────▶│    Shopify Storefront API    │ │
+│   │ (Product Fetch) │◀────────│  (Products, Collections,     │ │
+│   └─────────────────┘         │   Variants, Pricing)        │ │
+│                                └──────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Request Lifecycle
+
+```
+User types message
+      │
+      ▼
+React sends POST /api/chat
+      │
+      ▼
+Express extracts intent via Groq (Llama 3.1)
+      │
+      ├──▶ Detects product query → fetches from Shopify Storefront API
+      │         │
+      │         └──▶ Filters by budget / category / keywords
+      │
+      └──▶ Builds AI response with product recommendations
+                │
+                ▼
+      React renders chat reply + product cards
+                │
+                ▼
+      User adds to cart → proceeds to multi-step checkout
+```
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|---|---|
+| **React 18** | UI framework with hooks-based state management |
+| **React Router DOM** | Multi-page routing (chat, cart, checkout, order) |
+| **Axios** | HTTP client for API communication |
+| **Lucide React** | Clean, consistent icon library |
+| **CSS (Custom)** | Responsive dark UI with custom animations |
+
+### Backend
+| Technology | Purpose |
+|---|---|
+| **Node.js** | JavaScript runtime environment |
+| **Express.js** | REST API server and middleware management |
+| **Shopify Storefront API** | GraphQL-powered product, collection & cart data |
+| **Groq API (Llama 3.1)** | Ultra-fast LLM inference for conversational AI |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-ai-shopping-agent/
-├── backend/
-│   ├── controllers/
-│   │   ├── chatController.js      # Handles AI chat requests
-│   │   └── productsController.js  # Handles product/cart requests
-│   ├── routes/
-│   │   └── api.js                 # All API routes
-│   ├── services/
-│   │   ├── aiService.js           # Anthropic Claude integration
-│   │   └── shopifyService.js      # Shopify Storefront API
-│   ├── .env.example               # Environment variables template
-│   ├── package.json
-│   └── server.js                  # Express server entry point
+shopmind-ai/
 │
-├── frontend/
+├── client/                          # React Frontend
 │   ├── public/
 │   │   └── index.html
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── ProductCard.js     # Product display card
-│   │   │   ├── ProductCard.css
-│   │   │   ├── CartSidebar.js     # Sliding cart sidebar
-│   │   │   └── CartSidebar.css
-│   │   ├── context/
-│   │   │   └── CartContext.js     # Global cart state
+│   │   │   ├── ChatWindow.jsx       # Main AI chat interface
+│   │   │   ├── MessageBubble.jsx    # Individual chat message
+│   │   │   ├── ProductCard.jsx      # AI-recommended product display
+│   │   │   ├── CartSidebar.jsx      # Slide-in cart panel
+│   │   │   ├── CartItem.jsx         # Individual cart item
+│   │   │   ├── CheckoutForm.jsx     # Shipping & payment forms
+│   │   │   ├── OrderReview.jsx      # Pre-submission order summary
+│   │   │   └── OrderSuccess.jsx     # Post-order confirmation page
 │   │   ├── pages/
-│   │   │   ├── ChatPage.js        # Main chat interface
-│   │   │   └── ChatPage.css
-│   │   ├── utils/
-│   │   │   └── api.js             # API utility functions
-│   │   ├── App.js
-│   │   ├── index.js
-│   │   └── index.css
-│   ├── .env.example
+│   │   │   ├── Chat.jsx             # Chat page
+│   │   │   ├── Cart.jsx             # Cart page
+│   │   │   └── Checkout.jsx         # Checkout flow page
+│   │   ├── context/
+│   │   │   └── CartContext.jsx      # Global cart state (React Context)
+│   │   ├── services/
+│   │   │   └── api.js               # Axios API calls
+│   │   ├── styles/
+│   │   │   └── *.css                # Component-level stylesheets
+│   │   ├── App.jsx
+│   │   └── main.jsx
 │   └── package.json
 │
-├── package.json                   # Root scripts for concurrent dev
+├── server/                          # Node.js / Express Backend
+│   ├── routes/
+│   │   ├── chat.js                  # AI chat endpoint
+│   │   └── products.js              # Shopify product endpoints
+│   ├── services/
+│   │   ├── groqService.js           # Groq API integration (Llama 3.1)
+│   │   └── shopifyService.js        # Shopify Storefront API integration
+│   ├── middleware/
+│   │   └── errorHandler.js          # Centralized error handling
+│   ├── .env                         # Environment variables (git-ignored)
+│   ├── index.js                     # Express app entry point
+│   └── package.json
+│
+├── screenshots/                     # Project screenshots (add yours here)
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-## 🚀 Setup Guide
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- A Shopify store with Storefront API access
-- An Anthropic API key
 
----
+Ensure you have the following installed:
 
-### Step 1: Get Shopify Credentials
+- **Node.js** v18 or higher — [Download](https://nodejs.org/)
+- **npm** v9 or higher
+- A **Shopify store** with Storefront API access — [Get started](https://shopify.dev/docs/api/storefront)
+- A **Groq API key** — [Get yours free](https://console.groq.com/)
 
-1. Go to your Shopify Admin → **Apps** → **Develop apps**
-2. Create a new app (or use existing)
-3. Under **API credentials**, enable the **Storefront API**
-4. Add these scopes:
-   - `unauthenticated_read_product_listings`
-   - `unauthenticated_read_product_inventory`
-   - `unauthenticated_write_checkouts`
-   - `unauthenticated_read_checkouts`
-5. Copy your **Storefront API access token**
-6. Your store URL format: `https://your-store-name.myshopify.com`
+### Installation
 
----
-
-### Step 2: Get Anthropic API Key
-
-1. Go to [console.anthropic.com](https://console.anthropic.com)
-2. Create an API key
-3. Copy it
-
----
-
-### Step 3: Configure Backend
+**1. Clone the repository**
 
 ```bash
-cd backend
-cp .env.example .env
+git clone https://github.com/your-username/shopmind-ai.git
+cd shopmind-ai
 ```
 
-Edit `backend/.env`:
+**2. Install backend dependencies**
+
+```bash
+cd server
+npm install
+```
+
+**3. Install frontend dependencies**
+
+```bash
+cd ../client
+npm install
+```
+
+---
+
+## 🔑 Environment Variables
+
+Create a `.env` file inside the `/server` directory:
+
 ```env
-SHOPIFY_STORE_URL=https://your-store.myshopify.com
-SHOPIFY_ACCESS_TOKEN=your_storefront_access_token_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# ── Server ────────────────────────────────────────────
 PORT=5000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
+
+# ── Groq API ──────────────────────────────────────────
+GROQ_API_KEY=your_groq_api_key_here
+
+# ── Shopify Storefront API ────────────────────────────
+SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
+SHOPIFY_STOREFRONT_ACCESS_TOKEN=your_storefront_access_token_here
 ```
+
+> ⚠️ **Never commit your `.env` file.** It is already listed in `.gitignore`.
+
+#### Where to find your Shopify credentials:
+- Go to **Shopify Admin → Apps → Develop apps**
+- Create a new app and enable **Storefront API** access
+- Copy the **Storefront API access token** and your store's `.myshopify.com` domain
 
 ---
 
-### Step 4: Configure Frontend
+## ▶️ Running the App
+
+### Start the Backend (from `/server`)
 
 ```bash
-cd frontend
-cp .env.example .env
-```
-
-Edit `frontend/.env`:
-```env
-REACT_APP_API_URL=http://localhost:5000/api
-REACT_APP_STORE_NAME=My Store
-```
-
----
-
-### Step 5: Install & Run
-
-From the root directory:
-
-```bash
-# Install all dependencies
-npm run install:all
-
-# Run both backend and frontend simultaneously
 npm run dev
+# Server starts at http://localhost:5000
 ```
 
-Or separately:
+### Start the Frontend (from `/client`)
+
 ```bash
-# Terminal 1 - Backend (port 5000)
-npm run dev:backend
-
-# Terminal 2 - Frontend (port 3000)
-npm run dev:frontend
+npm run dev
+# App starts at http://localhost:5173
 ```
 
-Open [http://localhost:3000](http://localhost:3000) 🎉
+> Both servers must be running simultaneously. Open **http://localhost:5173** in your browser.
 
 ---
 
-## 🔌 API Endpoints
+## 🤖 AI Chat Workflow
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/chat` | Send message to AI agent |
-| `GET` | `/api/products` | Fetch products (optional `?query=&limit=`) |
-| `GET` | `/api/collections` | Fetch all collections |
-| `POST` | `/api/cart` | Create Shopify cart & get checkout URL |
-| `GET` | `/api/health` | Health check |
+The AI shopping assistant uses a structured pipeline to convert natural language into relevant product recommendations:
 
-### Chat Request Example
-```json
-POST /api/chat
-{
-  "userMessage": "I need a gift for my partner under $50",
-  "messages": [
-    { "role": "assistant", "content": "Hi! What are you looking for?" }
-  ]
-}
+```
+Step 1 — User Input
+  User: "I'm looking for a birthday gift under ₹2000, something for a fitness lover"
+
+Step 2 — Intent Extraction (Groq / Llama 3.1)
+  AI parses: { category: "fitness", budget: 2000, occasion: "birthday gift" }
+
+Step 3 — Product Fetching (Shopify Storefront API)
+  GraphQL query → fetches products filtered by category & price range
+
+Step 4 — AI Response Generation
+  Llama 3.1 crafts a friendly, contextual response with product suggestions
+
+Step 5 — UI Rendering
+  Chat message + interactive product cards displayed in the chat window
+
+Step 6 — Add to Cart
+  User clicks "Add to Cart" → item added to global cart state
 ```
 
-### Cart Request Example
-```json
-POST /api/cart
-{
-  "lineItems": [
-    { "variantId": "gid://shopify/ProductVariant/12345", "quantity": 1 }
-  ]
-}
+**Conversation memory** is maintained across the session, so the AI remembers earlier preferences and refines recommendations as the conversation evolves.
+
+---
+
+## 💳 Checkout Flow
+
+The checkout experience is broken into clear, guided steps to minimize friction:
+
+```
+┌──────────┐    ┌────────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│   Cart   │───▶│  Shipping  │───▶│   Payment   │───▶│    Review    │───▶│   Success   │
+│  Review  │    │    Info    │    │     UI      │    │    Order     │    │    Page     │
+└──────────┘    └────────────┘    └─────────────┘    └──────────────┘    └─────────────┘
 ```
 
----
-
-## 🎨 Customization
-
-### Change the AI personality
-Edit the `SYSTEM_PROMPT` in `backend/services/aiService.js` to match your brand voice.
-
-### Add product filtering
-Modify `fetchProducts()` in `backend/services/shopifyService.js` to add custom Shopify search filters.
-
-### Styling
-All styles use CSS custom properties defined in `frontend/src/index.css`. Update the `:root` variables to match your brand colors.
+| Step | Description |
+|---|---|
+| **1. Cart Review** | View all items, adjust quantities, see total pricing |
+| **2. Shipping Info** | Enter name, address, city, state, and postal code |
+| **3. Payment UI** | Secure card input form with CVV and expiry fields |
+| **4. Order Review** | Full summary of items, shipping details, and total cost |
+| **5. Order Success** | Confirmation page with order ID, summary, and next steps |
 
 ---
 
-## 🚢 Deployment
+## 🔮 Future Improvements
 
-### Backend (Railway / Render / Heroku)
-1. Set all environment variables in your hosting dashboard
-2. Set `NODE_ENV=production`
-3. Set `FRONTEND_URL` to your deployed frontend URL
-4. Deploy with `npm start`
-
-### Frontend (Vercel / Netlify)
-1. Set `REACT_APP_API_URL` to your deployed backend URL
-2. Run `npm run build`
-3. Deploy the `build/` folder
-
----
-
-## 🔐 Security Notes
-
-- Never commit `.env` files — they're in `.gitignore`
-- The Storefront API token is a **public** token (safe for client-facing apps), but keep it server-side anyway
-- The Anthropic API key must stay **server-side only**
-- Rate limiting is applied (100 requests / 15 minutes per IP)
+- [ ] 🔐 **User Authentication** — Login/signup with persistent order history
+- [ ] 💾 **Conversation Persistence** — Save and reload past chat sessions
+- [ ] 🌐 **Multi-language Support** — AI responses in Hindi, Spanish, etc.
+- [ ] 📊 **Analytics Dashboard** — Track most-asked queries and popular products
+- [ ] 🔎 **Advanced Filtering** — Filter by ratings, brands, color, and size in chat
+- [ ] 📱 **PWA Support** — Installable mobile app experience
+- [ ] 🎙️ **Voice Input** — Talk to the shopping assistant using speech recognition
+- [ ] 🧠 **Fine-tuned Model** — Custom Llama fine-tune on product catalog data
+- [ ] 📦 **Real Order Processing** — Full Shopify Checkout API integration for live orders
+- [ ] 🔔 **Push Notifications** — Order updates and abandoned cart reminders
 
 ---
 
-## 📝 License
+## 👨‍💻 Author
 
-MIT
+<div align="center">
+
+**Built with ❤️ by Aarushi Sharma**
+
+[![GitHub](https://img.shields.io/badge/GitHub-@your--username-181717?style=for-the-badge&logo=github)](https://github.com/your-username)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/your-profile)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-FF5722?style=for-the-badge&logo=firefox)](https://your-portfolio.dev)
+
+*Open to full-stack, AI/ML, and product engineering roles.*
+
+</div>
+
+---
+
+
+
+---
+
+<div align="center">
+
+*If you found this project helpful, please consider giving it a ⭐ on GitHub — it helps a lot!*
+
+**ShopMind AI** · Built with React, Node.js, Groq, and Shopify Storefront API
+
+</div>
