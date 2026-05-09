@@ -1,0 +1,20 @@
+{
+  "name": "ai-shopping-agent",
+  "version": "1.0.0",
+  "description": "Full-stack AI Shopping Agent with Shopify integration",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start:backend": "cd backend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "openai": "^6.37.0"
+  }
+}
