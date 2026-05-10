@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛍️ ShopMind AI
+# 🛍️ Shopping Tracker
 
 ### *Conversational Commerce, Reimagined*
 
