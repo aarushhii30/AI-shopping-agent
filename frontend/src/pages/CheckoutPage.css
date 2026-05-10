@@ -736,3 +736,41 @@ body {
   overflow-x: hidden;
 }
 
+/* ── Voice Button — paste at the end of ChatPage.css ── */
+
+.chat-voice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.chat-voice-btn:hover:not(:disabled) {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.chat-voice-btn--listening {
+  color: #ff4d4d;
+  border-color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.12);
+  animation: voice-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes voice-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(255, 77, 77, 0); }
+}
+
+.chat-voice-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
