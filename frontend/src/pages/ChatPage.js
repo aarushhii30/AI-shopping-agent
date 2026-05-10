@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Send, ShoppingBag, Sparkles, RotateCcw, Bot, User,
-  Loader, ChevronRight, Zap
+  Loader, ChevronRight, Zap, Mic, MicOff
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { apiChat } from '../utils/api';
@@ -71,12 +71,53 @@ const ChatPage = () => {
   const [input, setInput]       = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError]       = useState(null);
+
+  // ── VOICE: new state ──
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+  // ─────────────────────
+
   const messagesEndRef = useRef(null);
   const inputRef       = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  // ── VOICE: handler ──
+  const handleVoice = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert('Voice input is not supported in this browser. Please use Chrome.');
+      return;
+    }
+
+    // If already listening, stop
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend   = () => setIsListening(false);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.start();
+  }, [isListening]);
+  // ───────────────────
 
   const handleSend = useCallback(async (messageText) => {
     const text = (messageText || input).trim();
@@ -138,7 +179,7 @@ const ChatPage = () => {
           <div className="chat-header__logo"><Sparkles size={18} /></div>
           <div>
             <h1 className="chat-header__title">AI Shopping Agent</h1>
-            <span className="chat-header__subtitle">Smart search · No API key needed</span>
+           
           </div>
         </div>
 
@@ -199,6 +240,18 @@ const ChatPage = () => {
             rows={1}
             disabled={isLoading}
           />
+
+          {/* ── VOICE BUTTON ── */}
+          <button
+            className={`chat-voice-btn ${isListening ? 'chat-voice-btn--listening' : ''}`}
+            onClick={handleVoice}
+            disabled={isLoading}
+            title={isListening ? 'Stop listening' : 'Voice input'}
+          >
+            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+          </button>
+          {/* ───────────────── */}
+
           <button
             className={`chat-send-btn ${input.trim() && !isLoading ? 'active' : ''}`}
             onClick={() => handleSend()}
