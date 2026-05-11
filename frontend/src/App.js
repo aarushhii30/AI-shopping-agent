@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { CheckoutProvider } from './context/CheckoutContext';
 
@@ -12,21 +13,23 @@ import OrderSuccessPage from './pages/OrderSuccessPage';
 
 function App() {
   return (
-    <BrowserRouter>
-      <CartProvider>
-        <CheckoutProvider>
+    <AuthProvider>
+      <BrowserRouter>
+        <CartProvider>
+          <CheckoutProvider>
 
-          <Routes>
-            <Route path="/" element={<AuthPage />} />
-            <Route path="/chat" element={<ChatPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/order-success" element={<OrderSuccessPage />} />
-          </Routes>
+            <Routes>
+              <Route path="/" element={<AuthPage />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/order-success" element={<OrderSuccessPage />} />
+            </Routes>
 
-        </CheckoutProvider>
-      </CartProvider>
-    </BrowserRouter>
+          </CheckoutProvider>
+        </CartProvider>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
