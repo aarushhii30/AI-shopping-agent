@@ -1,4 +1,3 @@
-
 /* src/pages/AuthPage.css */
 
 .auth-page {
@@ -192,7 +191,7 @@
   color: #a89cf7;
 }
 
-/* Spin animation (reuse from ChatPage) */
+/* Spin animation */
 .spin {
   animation: spin 1s linear infinite;
 }

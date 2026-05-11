@@ -1,13 +1,13 @@
 // src/pages/AuthPage.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Mail, Lock, User, Eye, EyeOff, Loader } from 'lucide-react';
 import './AuthPage.css';
 
 
 const AuthPage = () => {
-  const navigate              = useNavigate();
+  
   const { login, signup }     = useAuth();
 
   const [isLogin, setIsLogin] = useState(true);
@@ -23,19 +23,28 @@ const AuthPage = () => {
     setError('');
     setLoading(true);
 
-    try {
-      if (isLogin) {
-        await login(email, password);
-        console.log("BEFORE NAVIGATE");
-        window.location.href = '/chat';
-      } else {
-        if (!name.trim()) { setError('Please enter your name.'); setLoading(false); return; }
-        if (password.length < 6) { setError('Password must be at least 6 characters.'); setLoading(false); return; }
-        await signup(email, password, name);
+   try {
+  if (isLogin) {
+    await login(email, password);
+  } else {
+    if (!name.trim()) {
+      setError('Please enter your name.');
+      setLoading(false);
+      return;
+    }
 
-      }window.location.href = '/chat';
-      navigate('/');
-    } catch (err) {
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      setLoading(false);
+      return;
+    }
+
+    await signup(email, password, name);
+  }
+
+  window.location.href = '/chat';
+
+} catch (err) {
       const msg = {
         'auth/user-not-found'    : 'No account found with this email.',
         'auth/wrong-password'    : 'Incorrect password. Try again.',
@@ -150,4 +159,7 @@ const AuthPage = () => {
   );
 };
 
+
+
 export default AuthPage;
+

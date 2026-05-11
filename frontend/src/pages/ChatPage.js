@@ -9,6 +9,7 @@ import { apiChat } from '../utils/api';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import './ChatPage.css';
+import { saveSearch, saveViewedProduct, getTopCategory, getSession } from '../utils/userSession';
 
 const SUGGESTED_PROMPTS = [
   "Show me all products",
@@ -19,6 +20,14 @@ const SUGGESTED_PROMPTS = [
   "Show me premium products",
 ];
 
+const getWelcomeMessage = () => {
+  const topCategory = getTopCategory();
+  if (topCategory) {
+    return `👋 Welcome back! You seem to love **${topCategory}** products.\nWant me to show you the latest in that category, or are you looking for something else today?`;
+  }
+  return "👋 Hi! I'm your AI shopping assistant\nI understand what you need and find the best matches from our store. Try asking me:\n- **\"Show me bags under ₹500\"**\n- **\"I need a gift for my mom\"**\n- **\"Best products for the gym\"**\n\nWhat are you looking for today?";
+};
+
 const TypingIndicator = () => (
   <div className="typing-indicator">
     <div className="typing-indicator__avatar"><Bot size={14} /></div>
@@ -28,7 +37,7 @@ const TypingIndicator = () => (
   </div>
 );
 
-const Message = ({ msg }) => {
+const Message = ({ msg, onProductClick }) => {
   const isUser = msg.role === 'user';
   return (
     <div className={`message message--${isUser ? 'user' : 'ai'}`}>
@@ -47,6 +56,7 @@ const Message = ({ msg }) => {
                 key={product.id}
                 product={product}
                 compact={msg.products.length > 2}
+                onClick={() => onProductClick(product)}
               />
             ))}
           </div>
@@ -62,20 +72,23 @@ const Message = ({ msg }) => {
 const ChatPage = () => {
   const navigate = useNavigate();
   const { totalItems } = useCart();
+
   const [messages, setMessages] = useState([{
     id: 1,
     role: 'assistant',
-    content: "👋 Hi! I'm your AI shopping assistant\nI understand what you need and find the best matches from our store. Try asking me:\n- **\"Show me bags under ₹500\"**\n- **\"I need a gift for my mom\"**\n- **\"Best products for the gym\"**\n\nWhat are you looking for today?",
+    content: getWelcomeMessage(),
     timestamp: new Date().toISOString(),
   }]);
-  const [input, setInput]       = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError]       = useState(null);
 
-  // ── VOICE: new state ──
+  const [input, setInput]         = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError]         = useState(null);
+
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef(null);
-  // ─────────────────────
+  const [interimText, setInterimText] = useState('');
+  const recognitionRef                = useRef(null);
+
+  const session = getSession();
 
   const messagesEndRef = useRef(null);
   const inputRef       = useRef(null);
@@ -84,16 +97,26 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // ── VOICE: handler ──
+  const handleProductClick = useCallback((product) => {
+    saveViewedProduct({
+      id: product.id,
+      title: product.title,
+      category: product.productType || product.category || '',
+      price: product.price,
+      image: product.image,
+    });
+  }, []);
+
   const handleVoice = useCallback(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       alert('Voice input is not supported in this browser. Please use Chrome.');
       return;
     }
 
-    // If already listening, stop
     if (isListening && recognitionRef.current) {
       recognitionRef.current.stop();
+      setIsListening(false);
+      setInterimText('');
       return;
     }
 
@@ -101,27 +124,47 @@ const ChatPage = () => {
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
 
-    recognition.lang = 'en-IN';
-    recognition.interimResults = false;
+    recognition.lang           = 'en-IN';
+    recognition.continuous     = true;
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend   = () => setIsListening(false);
+    recognition.onstart = () => { setIsListening(true); setInterimText(''); };
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      let finalText    = '';
+      let interimChunk = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += t + ' ';
+        else interimChunk += t;
+      }
+      if (finalText) setInput((prev) => (prev + finalText).trimStart());
+      setInterimText(interimChunk);
     };
 
-    recognition.onerror = () => setIsListening(false);
+    recognition.onerror = (e) => {
+      setIsListening(false);
+      setInterimText('');
+      if (e.error === 'not-allowed')
+        alert('Microphone access denied. Please allow mic in browser settings.');
+    };
+
+    recognition.onend = () => { setIsListening(false); setInterimText(''); };
     recognition.start();
   }, [isListening]);
-  // ───────────────────
 
   const handleSend = useCallback(async (messageText) => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      setInterimText('');
+    }
+
     const text = (messageText || input).trim();
     if (!text || isLoading) return;
+
+    saveSearch(text);
 
     const userMsg = {
       id: Date.now(),
@@ -154,13 +197,16 @@ const ChatPage = () => {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [input, isLoading, messages]);
+  }, [input, isLoading, isListening, messages]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const handleReset = () => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+    setInterimText('');
     setMessages([{
       id: Date.now(),
       role: 'assistant',
@@ -171,6 +217,8 @@ const ChatPage = () => {
     setInput('');
   };
 
+  const displayValue = isListening && interimText ? input + interimText : input;
+
   return (
     <div className="chat-page">
       {/* Header */}
@@ -179,19 +227,15 @@ const ChatPage = () => {
           <div className="chat-header__logo"><Sparkles size={18} /></div>
           <div>
             <h1 className="chat-header__title">AI Shopping Agent</h1>
-           
           </div>
         </div>
-
         <div className="chat-header__actions">
           <button className="header-btn" onClick={handleReset} title="Reset conversation">
             <RotateCcw size={16} />
           </button>
           <button className="cart-btn" onClick={() => navigate('/cart')}>
             <ShoppingBag size={18} />
-            {totalItems > 0 && (
-              <span className="cart-btn__badge">{totalItems}</span>
-            )}
+            {totalItems > 0 && <span className="cart-btn__badge">{totalItems}</span>}
           </button>
         </div>
       </header>
@@ -199,16 +243,31 @@ const ChatPage = () => {
       {/* Messages */}
       <main className="chat-messages">
         <div className="chat-messages__inner">
-          {messages.map((msg) => <Message key={msg.id} msg={msg} />)}
+          {messages.map((msg) => (
+            <Message key={msg.id} msg={msg} onProductClick={handleProductClick} />
+          ))}
           {isLoading && <TypingIndicator />}
-          {error && (
-            <div className="chat-error">
-              <Zap size={14} />{error}
-            </div>
-          )}
+          {error && <div className="chat-error"><Zap size={14} />{error}</div>}
 
           {messages.length <= 1 && !isLoading && (
             <div className="suggestions">
+              {session.searchHistory.length > 0 && (
+                <div className="recent-searches">
+                  <p className="suggestions__label">Recent:</p>
+                  <div className="suggestions__grid">
+                    {session.searchHistory.slice(0, 3).map((q, i) => (
+                      <button
+                        key={i}
+                        className="suggestion-chip recent-chip"
+                        onClick={() => handleSend(q)}
+                      >
+                        🕐 {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <p className="suggestions__label">Try asking:</p>
               <div className="suggestions__grid">
                 {SUGGESTED_PROMPTS.map((prompt) => (
@@ -229,19 +288,27 @@ const ChatPage = () => {
 
       {/* Input */}
       <div className="chat-input-area">
+        {isListening && (
+          <div className="voice-listening-bar">
+            <span className="voice-dot" />
+            <span className="voice-listening-text">
+              {interimText ? interimText : 'Listening… speak now'}
+            </span>
+          </div>
+        )}
+
         <div className="chat-input-wrapper">
           <textarea
             ref={inputRef}
             className="chat-input"
-            placeholder="Ask me anything about our products..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            placeholder={isListening ? '🎤 Listening...' : 'Ask me anything about our products...'}
+            value={displayValue}
+            onChange={(e) => { if (!isListening) setInput(e.target.value); }}
             onKeyDown={handleKeyDown}
             rows={1}
             disabled={isLoading}
           />
 
-          {/* ── VOICE BUTTON ── */}
           <button
             className={`chat-voice-btn ${isListening ? 'chat-voice-btn--listening' : ''}`}
             onClick={handleVoice}
@@ -250,12 +317,11 @@ const ChatPage = () => {
           >
             {isListening ? <MicOff size={18} /> : <Mic size={18} />}
           </button>
-          {/* ───────────────── */}
 
           <button
-            className={`chat-send-btn ${input.trim() && !isLoading ? 'active' : ''}`}
+            className={`chat-send-btn ${(input.trim() || interimText) && !isLoading ? 'active' : ''}`}
             onClick={() => handleSend()}
-            disabled={!input.trim() || isLoading}
+            disabled={(!input.trim() && !interimText) || isLoading}
           >
             {isLoading ? <Loader size={18} className="spin" /> : <Send size={18} />}
           </button>

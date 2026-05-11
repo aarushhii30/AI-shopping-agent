@@ -1,4 +1,3 @@
-
 // frontend/src/utils/userSession.js
 
 const SESSION_KEY = 'ai_shop_session';

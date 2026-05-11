@@ -56,7 +56,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 AI Shopping Agent API running on port ${PORT}`);
   console.log(`📦 Shopify Store: ${process.env.SHOPIFY_STORE_URL || "NOT SET"}`);
-console.log(`🤖 Groq AI: ${process.env.GROQ_API_KEY ? "CONFIGURED" : "NOT SET"}`);
+  console.log(`🤖 Groq AI: ${process.env.GROQ_API_KEY ? "CONFIGURED" : "NOT SET"}`);
   console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:3000"}\n`);
 });
 
