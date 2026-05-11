@@ -1,10 +1,10 @@
-
 // src/pages/AuthPage.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Mail, Lock, User, Eye, EyeOff, Loader } from 'lucide-react';
 import './AuthPage.css';
+
 
 const AuthPage = () => {
   const navigate              = useNavigate();
@@ -26,11 +26,14 @@ const AuthPage = () => {
     try {
       if (isLogin) {
         await login(email, password);
+        console.log("BEFORE NAVIGATE");
+        window.location.href = '/chat';
       } else {
         if (!name.trim()) { setError('Please enter your name.'); setLoading(false); return; }
         if (password.length < 6) { setError('Password must be at least 6 characters.'); setLoading(false); return; }
         await signup(email, password, name);
-      }
+
+      }window.location.href = '/chat';
       navigate('/');
     } catch (err) {
       const msg = {
@@ -60,6 +63,7 @@ const AuthPage = () => {
         {/* Tabs */}
         <div className="auth-tabs">
           <button
+          type="button"
             className={`auth-tab ${isLogin ? 'auth-tab--active' : ''}`}
             onClick={() => { setIsLogin(true); setError(''); }}
           >
@@ -133,6 +137,7 @@ const AuthPage = () => {
         <p className="auth-switch">
           {isLogin ? "Don't have an account? " : 'Already have an account? '}
           <button
+          type="button"
             className="auth-switch__link"
             onClick={() => { setIsLogin(!isLogin); setError(''); }}
           >
