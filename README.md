@@ -55,20 +55,27 @@
 | ⚡ **Low Latency AI** | Groq's ultra-fast inference delivers near-instant AI responses |
 
 ---
-
 ## 📸 Screenshots
 
-> *Add your screenshots to a `/screenshots` folder and update the paths below.*
-
 <div align="center">
+
+| Login Page | Sign Up Page |
+|:-:|:-:|
+| ![Login](screenshots/login.png) | ![Sign Up](screenshots/sign-up.png) |
 
 | AI Chat Interface | Product Recommendations |
 |:-:|:-:|
 | ![Chat UI](screenshots/chat-interface.png) | ![Products](screenshots/product-recommendations.png) |
 
-| Cart & Checkout | Order Confirmation |
+| Cart & Checkout | Order Details |
 |:-:|:-:|
-| ![Cart](screenshots/cart-checkout.png) | ![Order](screenshots/order-success.png) |
+| ![Cart](screenshots/cart-checkout.png) | ![Order Details](screenshots/order-details.png) |
+
+| Order Success |
+|:-:|
+| ![Order Success](screenshots/order-successful.png) |
+
+
 
 </div>
 
