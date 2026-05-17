@@ -81,10 +81,10 @@ const ChatPage = () => {
   // This avoids the race condition where navigate() fires before the auth
   // state has fully settled, which leaves a blank screen.
   useEffect(() => {
-    if (user === null) {
-      navigate('/auth', { replace: true });
-    }
-  }, [user, navigate]);
+  if (user === null && window.location.pathname !== '/auth') {
+    navigate('/auth', { replace: true });
+  }
+}, [user, navigate]);
   // ─────────────────────────────────────────────────────────────────────────
 
   const [messages, setMessages] = useState([{
