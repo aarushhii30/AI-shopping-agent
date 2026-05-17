@@ -2,14 +2,15 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Send, ShoppingBag, Sparkles, RotateCcw, Bot, User,
-  Loader, ChevronRight, Zap, Mic, MicOff
+  Loader, ChevronRight, Zap, Mic, MicOff, LogOut
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { apiChat } from '../utils/api';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 import './ChatPage.css';
-import { saveSearch, saveViewedProduct, getTopCategory, getSession } from '../utils/userSession';
+import { saveSearch, saveViewedProduct, getTopCategory, getSession, clearSession } from '../utils/userSession';
 
 const SUGGESTED_PROMPTS = [
   "Show me all products",
@@ -72,6 +73,7 @@ const Message = ({ msg, onProductClick }) => {
 const ChatPage = () => {
   const navigate = useNavigate();
   const { totalItems } = useCart();
+  const { logout } = useAuth();
 
   const [messages, setMessages] = useState([{
     id: 1,
@@ -96,6 +98,17 @@ const ChatPage = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      recognitionRef.current?.stop();
+      clearSession();
+      await logout();
+      navigate('/auth');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  }, [logout, navigate]);
 
   const handleProductClick = useCallback((product) => {
     saveViewedProduct({
@@ -124,9 +137,9 @@ const ChatPage = () => {
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
 
-    recognition.lang           = 'en-IN';
-    recognition.continuous     = true;
-    recognition.interimResults = true;
+    recognition.lang            = 'en-IN';
+    recognition.continuous      = true;
+    recognition.interimResults  = true;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => { setIsListening(true); setInterimText(''); };
@@ -236,6 +249,9 @@ const ChatPage = () => {
           <button className="cart-btn" onClick={() => navigate('/cart')}>
             <ShoppingBag size={18} />
             {totalItems > 0 && <span className="cart-btn__badge">{totalItems}</span>}
+          </button>
+          <button className="header-btn" onClick={handleLogout} title="Logout">
+            <LogOut size={16} />
           </button>
         </div>
       </header>
