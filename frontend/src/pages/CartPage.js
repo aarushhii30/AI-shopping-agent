@@ -18,11 +18,14 @@ const CartPage = () => {
   const [promoError, setPromoError] = useState('');
   const [removing, setRemoving]     = useState(null);
 
-  const discount     = PROMO_CODES[promoCode] || 0;
-  const discountAmt  = (totalPrice * discount) / 100;
-  const shipping     = totalPrice > 500 ? 0 : 49;
-  const tax          = (totalPrice - discountAmt) * 0.18;
-  const grandTotal   = totalPrice - discountAmt + shipping + tax;
+  const discount    = PROMO_CODES[promoCode] || 0;
+  const discountAmt = (totalPrice * discount) / 100;
+
+  // FIX: shipping threshold uses ₹500. If your prices are stored in rupees
+  // this is correct. If stored in paise (×100), change 500 → 50000.
+  const shipping  = totalPrice > 500 ? 0 : 49;
+  const tax       = (totalPrice - discountAmt) * 0.18;
+  const grandTotal = totalPrice - discountAmt + shipping + tax;
 
   const applyPromo = () => {
     const code = promoInput.trim().toUpperCase();
@@ -50,7 +53,7 @@ const CartPage = () => {
           <div className="empty-icon"><ShoppingBag size={56} /></div>
           <h2>Your cart is empty</h2>
           <p>Looks like you haven't added anything yet.</p>
-          <button className="btn-primary" onClick={() => navigate('/')}>
+          <button className="btn-primary" onClick={() => navigate('/chat')}>
             <ArrowLeft size={16} /> Start Shopping
           </button>
         </div>
@@ -62,7 +65,7 @@ const CartPage = () => {
     <div className="cart-page">
       {/* Header */}
       <div className="cart-page__header">
-        <button className="back-btn" onClick={() => navigate('/')}>
+        <button className="back-btn" onClick={() => navigate('/chat')}>
           <ArrowLeft size={18} />
         </button>
         <div>
@@ -72,7 +75,8 @@ const CartPage = () => {
       </div>
 
       <div className="cart-page__body">
-        {/* Items */}
+
+        {/* ── Items column ───────────────────────────────── */}
         <div className="cart-items-section">
           <div className="trust-badges">
             <span><ShieldCheck size={13} /> Secure Checkout</span>
@@ -86,6 +90,7 @@ const CartPage = () => {
                 key={item.variantId}
                 className={`cart-item-row ${removing === item.variantId ? 'removing' : ''}`}
               >
+                {/* Thumbnail — fixed size, never shrinks */}
                 <div className="cart-item-row__image">
                   {item.image
                     ? <img src={item.image} alt={item.title} />
@@ -93,17 +98,33 @@ const CartPage = () => {
                   }
                 </div>
 
+                {/* Info — takes remaining space, clips overflow */}
                 <div className="cart-item-row__info">
                   <p className="cart-item-row__title">{item.title}</p>
                   {item.variantTitle && (
                     <span className="cart-item-row__variant">{item.variantTitle}</span>
                   )}
+                  {/* Price shown under title on mobile only */}
                   <span className="cart-item-row__price-mobile">
-                    {formatPrice(item.price, currency)}
+                    {formatPrice(item.price * item.quantity, currency)}
                   </span>
+
+                  {/* Qty controls inside info on mobile so they sit below title */}
+                  <div className="cart-item-row__qty cart-item-row__qty--mobile">
+                    <button
+                      className="qty-ctrl"
+                      onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                    ><Minus size={13} /></button>
+                    <span className="qty-num">{item.quantity}</span>
+                    <button
+                      className="qty-ctrl"
+                      onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                    ><Plus size={13} /></button>
+                  </div>
                 </div>
 
-                <div className="cart-item-row__qty">
+                {/* Qty controls — desktop only */}
+                <div className="cart-item-row__qty cart-item-row__qty--desktop">
                   <button
                     className="qty-ctrl"
                     onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
@@ -115,7 +136,8 @@ const CartPage = () => {
                   ><Plus size={13} /></button>
                 </div>
 
-                <div className="cart-item-row__price">
+                {/* Price — desktop only */}
+                <div className="cart-item-row__price cart-item-row__price--desktop">
                   {formatPrice(item.price * item.quantity, currency)}
                 </div>
 
@@ -147,7 +169,7 @@ const CartPage = () => {
           )}
         </div>
 
-        {/* Summary */}
+        {/* ── Summary panel ──────────────────────────────── */}
         <div className="cart-summary-panel">
           <h2 className="summary-title">Order Summary</h2>
 
@@ -164,7 +186,12 @@ const CartPage = () => {
             )}
             <div className="summary-line">
               <span>Shipping</span>
-              <span>{shipping === 0 ? <span className="free-tag">FREE</span> : formatPrice(shipping, currency)}</span>
+              <span>
+                {shipping === 0
+                  ? <span className="free-tag">FREE</span>
+                  : formatPrice(shipping, currency)
+                }
+              </span>
             </div>
             <div className="summary-line">
               <span>GST (18%)</span>
@@ -184,7 +211,7 @@ const CartPage = () => {
             Proceed to Checkout <ChevronRight size={18} />
           </button>
 
-          <button className="continue-btn" onClick={() => navigate('/')}>
+          <button className="continue-btn" onClick={() => navigate('/chat')}>
             <ArrowLeft size={14} /> Continue Shopping
           </button>
 
