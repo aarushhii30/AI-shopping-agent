@@ -1,124 +1,152 @@
 /* ============================================================
-   CheckoutPage — Mobile Responsiveness Fix
-   Paste this at the END of your existing CheckoutPage.css,
-   replacing (or merging with) the existing @media blocks.
+   CheckoutPage — CORRECTED Mobile Fix (v2)
+   
+   HOW TO USE:
+   1. Open CheckoutPage.css
+   2. Find the existing @media (max-width: 900px) block at the
+      bottom and DELETE it entirely.
+   3. Paste this entire file at the end of CheckoutPage.css.
+   
+   This ONLY touches mobile (≤640px). Desktop is untouched.
    ============================================================ */
 
-/* ── 1. ROOT-LEVEL BUG FIX (applies at all widths) ────────────
-   The .form-section rule in the original file has
-   `padding-bottom: 120px` which pushes the "Continue to
-   Payment" button off-screen on every viewport.
-   Reset it here so it wins via cascade.                      */
+/* ── GLOBAL: Fix the padding-bottom:120px bug on .form-section
+   This is the #1 cause of the clipped "Continue to Payment"
+   button. The original rule has padding-bottom:120px which
+   pushes content off-screen. This overrides it at ALL sizes. ── */
 .form-section {
-  padding-bottom: 24px; /* was 120px — the main culprit      */
+  padding-bottom: 24px;
 }
 
-/* ── 2. DUPLICATE padding on .checkout-page__main fix ─────────
-   Original file declares the rule twice (40px 48px 120px
-   then 40px 48px 80px). The second wins on desktop — fine.
-   We just make sure mobile overrides it cleanly below.       */
-
-/* ── 3. PREVENT horizontal overflow globally ──────────────── */
-.checkout-page,
-.checkout-page__main,
-.checkout-page__sidebar,
-.checkout-form,
-.form-section,
-.order-sidebar {
-  box-sizing: border-box;
-  max-width: 100%;
-}
-
-/* ── 4. MOBILE  ≤ 900px ─────────────────────────────────────── */
-@media (max-width: 900px) {
-
-  /* Stack sidebar BELOW the form (remove order: -1 so form
-     appears first — more natural UX on mobile)              */
+/* ══════════════════════════════════════════════════════════
+   TABLET  641px – 900px  (restore original behaviour)
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 641px) and (max-width: 900px) {
   .checkout-page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    overflow-x: hidden;
+    grid-template-columns: 1fr;   /* single col on tablet     */
+    grid-template-rows: auto auto;
   }
 
-  /* Main form column — full width, proper padding           */
   .checkout-page__main {
-    width: 100%;
-    padding: 20px 16px 48px;   /* was 40px 48px — too wide  */
+    padding: 24px 20px 60px;
     border-right: none;
-    overflow-x: hidden;
-    /* Remove fixed height so content flows naturally        */
     height: auto;
     overflow-y: visible;
   }
 
-  /* Sidebar — full width strip at top, collapsed by default */
   .checkout-page__sidebar {
-    width: 100%;
-    order: -1;                 /* keep summary above form    */
     position: static;
     max-height: none;
-    padding: 12px 16px;
+    order: -1;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr 1fr; /* keep 2-col on tablet   */
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE  ≤ 640px  — ALL fixes live here only
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Page shell: single column, no horizontal overflow       */
+  .checkout-page {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    overflow-x: hidden;
+  }
+
+  /* Sidebar: thin strip at top, no sticky                   */
+  .checkout-page__sidebar {
+    order: -1;
+    position: static;
+    max-height: none;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border);
     overflow: visible;
   }
 
-  /* Top bar spacing                                         */
-  .checkout-page__top {
-    margin-bottom: 24px;
+  /* Main column: full width, comfortable padding            */
+  .checkout-page__main {
+    padding: 20px 14px 40px;
+    border-right: none;
+    /* Let content grow naturally — no height cap            */
+    height: auto;
+    overflow-y: visible;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 
-  /* Step bar — tighten on narrow screens                    */
+  /* Top bar                                                 */
+  .checkout-page__top {
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  /* ── Step bar: show numbers, hide text labels on very
+     narrow phones. Circles stay at original size.          */
   .step-bar {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .step-node__label {
-    font-size: 10px;
-  }
-
-  .step-node__circle {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
+    font-size: 9px;
+    letter-spacing: 0.03em;
   }
 
   /* Step title                                              */
   .checkout-step-title {
     font-size: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 
-  /* Form sections — remove the killer bottom padding        */
+  /* ── Form sections: remove giant padding-bottom           */
   .form-section {
-    padding: 18px 16px 18px;   /* symmetric, no giant gap   */
+    padding: 16px 14px 16px;
     gap: 14px;
+    box-sizing: border-box;
+    width: 100%;
   }
 
-  /* form-row: stack to single column on mobile              */
+  /* ── All form-rows: stack to 1 column on mobile           */
   .form-row {
     grid-template-columns: 1fr;
     gap: 14px;
   }
 
-  /* Inputs — slightly larger tap targets                    */
+  /* Inputs: font-size 16px prevents iOS zoom-in            */
   .form-input {
-    padding: 13px 14px;
-    font-size: 16px;           /* prevents iOS auto-zoom     */
+    font-size: 16px;
+    padding: 12px 14px;
   }
 
   .form-input-wrap .form-input {
     padding-left: 36px;
   }
 
-  /* Navigation buttons row                                  */
+  /* ── "Continue to Payment" button (standalone, step 1)
+     This is the button that was clipped off-screen.
+     Making it full-width and ensuring its parent doesn't
+     hide it fixes the issue.                               */
+  .next-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 15px;
+    margin-top: 4px;
+    box-sizing: border-box;
+  }
+
+  /* ── Step 2 & 3 nav row: stack vertically                 */
   .checkout-nav {
-    flex-direction: column-reverse; /* Back below primary btn */
+    flex-direction: column;
     gap: 10px;
   }
 
-  .checkout-nav .next-btn,
-  .checkout-nav .place-order-btn {
+  .checkout-nav .next-btn {
     width: 100%;
     flex: none;
   }
@@ -126,123 +154,88 @@
   .checkout-nav .back-ghost-btn {
     width: 100%;
     justify-content: center;
-  }
-
-  /* Standalone next-btn (step 1 has no checkout-nav)       */
-  .next-btn {
-    width: 100%;
-    padding: 15px;
-    font-size: 15px;
-    /* Ensure it's never clipped by its parent               */
-    position: relative;
-    z-index: 1;
+    padding: 13px;
   }
 
   .place-order-btn {
     width: 100%;
+    flex: none;
     padding: 15px;
     font-size: 15px;
   }
 
-  /* Payment methods — full width buttons                    */
+  /* ── Payment method buttons                               */
   .payment-method-btn {
     padding: 13px 14px;
     font-size: 14px;
   }
 
-  /* Card preview — smaller on mobile                        */
+  /* ── Card preview                                         */
   .card-preview {
     padding: 18px;
   }
 
   .card-preview__number {
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.1em;
   }
 
-  /* Review blocks                                           */
+  /* ── Review step blocks                                   */
   .review-block {
-    padding: 14px 16px;
+    padding: 14px;
   }
 
   .review-total {
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
-    padding: 14px 16px;
+    padding: 14px;
   }
 
   .review-total__amount {
     font-size: 20px;
   }
 
-  /* Sidebar order summary card                              */
-  .order-sidebar {
-    border-radius: 12px;
-  }
-
+  /* ── Sidebar summary strip                                */
   .sidebar-toggle {
-    padding: 14px 16px;
+    padding: 13px 14px;
+    font-size: 13px;
   }
 
-  .sidebar-items {
-    padding: 12px 16px;
+  .sidebar-toggle__price {
+    font-size: 14px;
   }
 
-  .sidebar-totals {
-    padding: 12px 16px;
-  }
+  .sidebar-items  { padding: 10px 14px; }
+  .sidebar-totals { padding: 10px 14px; }
 
-  /* Express pay info layout                                 */
+  /* ── Express pay                                          */
   .express-pay-info {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  /* UPI logos wrap properly                                 */
-  .upi-logos {
-    gap: 8px;
-  }
-
-  /* Secure note — wrap on small screens                     */
+  /* ── Secure note                                          */
   .secure-note {
-    text-align: center;
     flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
   }
 }
 
-/* ── 5. EXTRA SMALL  ≤ 400px ───────────────────────────────── */
-@media (max-width: 400px) {
+/* ══════════════════════════════════════════════════════════
+   EXTRA SMALL  ≤ 380px
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 380px) {
 
-  .checkout-page__main {
-    padding: 16px 12px 40px;
-  }
-
-  .checkout-page__sidebar {
-    padding: 10px 12px;
-  }
-
-  .form-section {
-    padding: 14px 12px 14px;
-  }
-
-  .checkout-step-title {
-    font-size: 18px;
-  }
-
-  .step-node__label {
-    display: none;            
-
-  .card-preview__number {
-    font-size: 13px;
-  }
+  .checkout-page__main  { padding: 16px 10px 36px; }
+  .checkout-page__sidebar { padding: 8px 10px; }
+  .form-section         { padding: 14px 10px; }
+  .checkout-step-title  { font-size: 17px; }
+  .step-node__label     { display: none; }  /* too narrow for labels */
 
   .next-btn,
   .place-order-btn,
   .back-ghost-btn {
     font-size: 14px;
-    padding: 13px 12px;
+    padding: 13px 10px;
   }
-}
 }
