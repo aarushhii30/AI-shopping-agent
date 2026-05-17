@@ -563,3 +563,27 @@
     position: static;
   }
 }
+/* ══════════════════════════════════════════════════════════
+  
+   ══════════════════════════════════════════════════════════ */
+
+/* ── MOBILE ≤ 640px ─────────────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* Summary panel: NOT sticky on mobile — it clips the button */
+  .cart-summary-panel {
+    position: static !important;
+    top: auto !important;
+  }
+
+  /* Make sure the checkout button and payment icons
+     are never cut off by overflow */
+  .cart-page__body {
+    overflow: visible !important;
+  }
+
+  /* Extra bottom padding so last element breathes */
+  .cart-page {
+    padding-bottom: 24px;
+  }
+}
