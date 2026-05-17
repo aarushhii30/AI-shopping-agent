@@ -10,8 +10,6 @@
 .checkout-page__main {
   padding: 40px 48px 80px;
   border-right: 1px solid var(--border);
-  overflow-y: auto;
-  height: 100vh;
   box-sizing: border-box;
 }
 
@@ -597,6 +595,7 @@ select.form-input {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Allow vertical scroll, never horizontal */
 html, body { overflow-x: hidden; }
 
 /* ── Voice Button ─────────────────────────────────────────────────────────── */
@@ -629,6 +628,16 @@ html, body { overflow-x: hidden; }
 .chat-voice-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ══════════════════════════════════════════════════════════
+   DESKTOP ONLY  > 900px — fixed-height scrollable column
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 901px) {
+  .checkout-page__main {
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
    TABLET  641px – 900px
    ══════════════════════════════════════════════════════════ */
 @media (min-width: 641px) and (max-width: 900px) {
@@ -655,30 +664,38 @@ html, body { overflow-x: hidden; }
    ══════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
 
-  .checkout-page { grid-template-columns: 1fr; }
-
-  /* ─ Sidebar: compact strip, always at top ─ */
-  .checkout-page__sidebar {
-    order: -1;
-    position: static;
-    max-height: none;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    overflow: visible;
+  /* ── KEY FIX 1: let the whole page scroll naturally ── */
+  /* The grid becomes a single column that grows with content.
+     The browser's native scroll handles everything — no JS needed. */
+  .checkout-page {
+    grid-template-columns: 1fr;
+    min-height: 100dvh;        /* dvh avoids mobile browser toolbar overlap */
+    height: auto;              /* never lock the page height on mobile */
   }
 
-  /* ─ THE KEY FIX: remove height:100vh so page scrolls fully ─ */
+  /* ── KEY FIX 2: sidebar at top, never sticky, no height cap ── */
+  .checkout-page__sidebar {
+    order: -1;
+    position: static;          /* un-sticky so it doesn't eat scroll space */
+    max-height: none;          /* remove the 100vh cap */
+    overflow: visible;         /* no inner scroll trap */
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── KEY FIX 3: main column scrolls with the page, not inside itself ── */
   .checkout-page__main {
     height: auto !important;
     min-height: 0 !important;
-    overflow-y: visible !important;
+    overflow-y: visible !important;  /* remove inner scroll — page scrolls instead */
     overflow-x: hidden;
-    padding: 20px 14px 60px;
+    padding: 20px 14px 80px;         /* 80px bottom so button is never clipped */
     border-right: none;
     box-sizing: border-box;
     width: 100%;
   }
 
+  /* ── Rest: visual tweaks only, no layout changes ── */
   .checkout-page__top { margin-bottom: 20px; gap: 10px; }
   .checkout-brand__name { font-size: 16px; }
 
@@ -695,11 +712,12 @@ html, body { overflow-x: hidden; }
 
   .form-row { grid-template-columns: 1fr; gap: 12px; }
 
-  /* 16px prevents iOS keyboard zoom */
+  /* 16px prevents iOS auto-zoom on input focus */
   .form-input { font-size: 16px !important; padding: 13px 14px; }
   .form-input-wrap .form-input { padding-left: 36px; }
   .form-label { font-size: 11px; }
 
+  /* Buttons — keep their position, just ensure full width */
   .next-btn { padding: 15px; font-size: 15px; }
 
   .checkout-nav { flex-direction: column; gap: 10px; }
@@ -728,7 +746,7 @@ html, body { overflow-x: hidden; }
    EXTRA SMALL  ≤ 380px
    ══════════════════════════════════════════════════════════ */
 @media (max-width: 380px) {
-  .checkout-page__main    { padding: 14px 10px 40px; }
+  .checkout-page__main    { padding: 14px 10px 60px; }
   .checkout-page__sidebar { padding: 8px 10px; }
   .form-section           { padding: 12px 10px; }
   .checkout-step-title    { font-size: 17px; }
