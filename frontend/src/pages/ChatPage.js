@@ -75,17 +75,14 @@ const ChatPage = () => {
   const { totalItems } = useCart();
   const { user, logout } = useAuth();
 
-  // ── FIX: Auth-state-driven redirect ──────────────────────────────────────
-  // When Firebase signs the user out, onAuthStateChanged sets user → null in
-  // AuthContext. We watch that here and navigate to /auth immediately.
-  // This avoids the race condition where navigate() fires before the auth
-  // state has fully settled, which leaves a blank screen.
+  // When Firebase signs out, user becomes null → redirect to /auth.
+  // This is the correct pattern: let auth state drive navigation,
+  // not a manual navigate() call right after logout().
   useEffect(() => {
     if (user === null) {
       navigate('/auth', { replace: true });
     }
   }, [user, navigate]);
-  // ─────────────────────────────────────────────────────────────────────────
 
   const [messages, setMessages] = useState([{
     id: 1,
@@ -94,16 +91,14 @@ const ChatPage = () => {
     timestamp: new Date().toISOString(),
   }]);
 
-  const [input, setInput]         = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError]         = useState(null);
-
+  const [input, setInput]           = useState('');
+  const [isLoading, setIsLoading]   = useState(false);
+  const [error, setError]           = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [interimText, setInterimText] = useState('');
-  const recognitionRef                = useRef(null);
+  const recognitionRef              = useRef(null);
 
   const session = getSession();
-
   const messagesEndRef = useRef(null);
   const inputRef       = useRef(null);
 
@@ -111,14 +106,13 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // ── FIX: Logout only calls signOut; the useEffect above handles the redirect.
-  // This removes the manual navigate('/auth') call that caused blank screens.
+  // Logout: only call signOut + clearSession.
+  // The useEffect above reacts to user → null and navigates.
   const handleLogout = useCallback(async () => {
     try {
       recognitionRef.current?.stop();
       clearSession();
       await logout();
-      // No navigate() here — the user effect above reacts to user becoming null
     } catch (err) {
       console.error('Logout failed:', err);
     }
