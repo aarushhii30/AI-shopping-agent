@@ -73,7 +73,19 @@ const Message = ({ msg, onProductClick }) => {
 const ChatPage = () => {
   const navigate = useNavigate();
   const { totalItems } = useCart();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+
+  // ── FIX: Auth-state-driven redirect ──────────────────────────────────────
+  // When Firebase signs the user out, onAuthStateChanged sets user → null in
+  // AuthContext. We watch that here and navigate to /auth immediately.
+  // This avoids the race condition where navigate() fires before the auth
+  // state has fully settled, which leaves a blank screen.
+  useEffect(() => {
+    if (user === null) {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, navigate]);
+  // ─────────────────────────────────────────────────────────────────────────
 
   const [messages, setMessages] = useState([{
     id: 1,
@@ -99,16 +111,18 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  // ── FIX: Logout only calls signOut; the useEffect above handles the redirect.
+  // This removes the manual navigate('/auth') call that caused blank screens.
   const handleLogout = useCallback(async () => {
     try {
       recognitionRef.current?.stop();
       clearSession();
       await logout();
-      navigate('/auth');
+      // No navigate() here — the user effect above reacts to user becoming null
     } catch (err) {
       console.error('Logout failed:', err);
     }
-  }, [logout, navigate]);
+  }, [logout]);
 
   const handleProductClick = useCallback((product) => {
     saveViewedProduct({
