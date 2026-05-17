@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -19,11 +19,17 @@ function App() {
           <CheckoutProvider>
 
             <Routes>
-              <Route path="/" element={<AuthPage />} />
-              <Route path="/chat" element={<ChatPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
+              {/* Both / and /auth render the login page */}
+              <Route path="/"     element={<AuthPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+
+              <Route path="/chat"          element={<ChatPage />} />
+              <Route path="/cart"          element={<CartPage />} />
+              <Route path="/checkout"      element={<CheckoutPage />} />
               <Route path="/order-success" element={<OrderSuccessPage />} />
+
+              {/* Catch-all: any unknown URL → login */}
+              <Route path="*" element={<Navigate to="/auth" replace />} />
             </Routes>
 
           </CheckoutProvider>
