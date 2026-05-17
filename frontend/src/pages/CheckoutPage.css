@@ -10,9 +10,8 @@
 .checkout-page__main {
   padding: 40px 48px 80px;
   border-right: 1px solid var(--border);
-  overflow-y: auto;
-  height: 100vh;
   box-sizing: border-box;
+  /* height and overflow-y set per breakpoint below */
 }
 
 .checkout-page__sidebar {
@@ -627,6 +626,16 @@ html, body { overflow-x: hidden; }
 }
 
 .chat-voice-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ══════════════════════════════════════════════════════════
+   DESKTOP ONLY  > 900px — fixed-height scrollable column
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 901px) {
+  .checkout-page__main {
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
 
 /* ══════════════════════════════════════════════════════════
    TABLET  641px – 900px
