@@ -43,7 +43,28 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
+  /* 
+    FIXED: overflow:hidden was blocking ALL scroll on mobile.
+    Desktop pages (chat) manage scroll inside their own containers.
+    Mobile pages (checkout) need the body itself to scroll.
+    Solution: only apply overflow:hidden on desktop.
+  */
+  overflow-x: hidden; /* always block horizontal scroll */
+  overflow-y: hidden; /* desktop default — chat page scrolls internally */
+}
+
+/* On mobile, allow body to scroll so checkout/shipping form works */
+@media (max-width: 640px) {
+  body {
+    overflow-y: auto;
+    /* smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html, #root {
+    height: auto;
+    min-height: 100dvh;
+  }
 }
 
 ::-webkit-scrollbar {
