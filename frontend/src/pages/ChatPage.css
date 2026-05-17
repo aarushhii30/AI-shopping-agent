@@ -1,7 +1,11 @@
 .chat-page {
   display: flex;
   flex-direction: column;
+  /* Fix: 100vh on mobile Chrome/Safari includes browser toolbar,
+     causing content to hide behind it. Use 100dvh where supported,
+     fall back to 100vh */
   height: 100vh;
+  height: 100dvh;
   background: var(--bg-primary);
   position: relative;
   overflow: hidden;
@@ -26,23 +30,22 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  /* Safe area for notch/status bar on mobile */
-  padding-top: max(16px, env(safe-area-inset-top, 16px));
   background: rgba(17, 17, 24, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  z-index: 10;
-  position: relative;
+  /* Stick to top, never scroll away */
+  position: sticky;
+  top: 0;
+  z-index: 100;
   flex-shrink: 0;
-  /* Prevent header from collapsing */
-  min-height: 60px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chat-header__brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  /* Allow brand to shrink so buttons stay visible */
   min-width: 0;
   flex: 1;
   overflow: hidden;
@@ -51,7 +54,6 @@
 .chat-header__logo {
   width: 40px;
   height: 40px;
-  /* Never let logo shrink */
   min-width: 40px;
   flex-shrink: 0;
   background: linear-gradient(135deg, var(--accent), var(--accent-light));
@@ -69,7 +71,6 @@
   font-weight: 800;
   color: var(--text-primary);
   letter-spacing: -0.02em;
-  /* Truncate title instead of pushing buttons off screen */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -86,7 +87,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  /* Never shrink — buttons must always be visible */
   flex-shrink: 0;
   margin-left: 12px;
 }
@@ -94,7 +94,6 @@
 .header-btn {
   width: 38px;
   height: 38px;
-  /* Lock size */
   min-width: 38px;
   flex-shrink: 0;
   display: flex;
@@ -105,6 +104,7 @@
   border-radius: 10px;
   color: var(--text-secondary);
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .header-btn:hover {
@@ -128,6 +128,7 @@
   font-weight: 600;
   transition: all 0.2s ease;
   position: relative;
+  cursor: pointer;
 }
 
 .cart-btn:hover {
@@ -159,6 +160,8 @@
   overflow-x: hidden;
   position: relative;
   z-index: 1;
+  /* Prevent iOS bounce from hiding content */
+  -webkit-overflow-scrolling: touch;
 }
 
 .chat-messages__inner {
@@ -209,7 +212,6 @@
   padding: 14px 18px;
   border-radius: var(--radius-lg);
   position: relative;
-  /* Prevent text overflow */
   word-break: break-word;
   overflow-wrap: break-word;
   min-width: 0;
@@ -361,7 +363,7 @@
   font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
-  /* Do NOT set width:100% — chips should wrap naturally */
+  cursor: pointer;
 }
 
 .suggestion-chip:hover {
@@ -388,14 +390,14 @@
 /* ── Input ────────────────────────────────────── */
 .chat-input-area {
   padding: 16px 24px 20px;
-  /* Safe area for home indicator on iOS */
-  padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
   background: rgba(10, 10, 15, 0.95);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
   position: relative;
   z-index: 10;
   flex-shrink: 0;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .chat-input-wrapper {
@@ -409,6 +411,7 @@
   border-radius: 16px;
   padding: 12px 12px 12px 18px;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
 .chat-input-wrapper:focus-within {
@@ -428,6 +431,7 @@
   min-height: 24px;
   max-height: 120px;
   overflow-y: auto;
+  outline: none;
 }
 
 .chat-input::placeholder {
@@ -446,6 +450,8 @@
   background: var(--text-muted);
   color: white;
   transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
 }
 
 .chat-send-btn.active {
@@ -563,18 +569,10 @@
 }
 
 /* ── Mobile (max-width: 640px) ──────────────────────────── */
-/*
-  CONSERVATIVE: Only fix what's broken.
-  - Header padding reduced so buttons fit
-  - Message bubbles a bit wider
-  - Suggestion chips stay inline (flex-wrap kept)
-  - No layout changes that break the design
-*/
 @media (max-width: 640px) {
   .chat-header {
-    padding: 12px 14px;
-    padding-top: max(12px, env(safe-area-inset-top, 12px));
-    gap: 0;
+    padding: 10px 12px;
+    min-height: 54px;
   }
 
   .chat-header__logo {
@@ -584,59 +582,58 @@
   }
 
   .chat-header__title {
-    font-size: 15px;
+    font-size: 14px;
   }
 
-  /* Hide subtitle on mobile */
   .chat-header__subtitle {
     display: none;
   }
 
-  /* Tighter gap between action buttons */
   .chat-header__actions {
     gap: 6px;
     margin-left: 8px;
   }
 
-  /* Slightly smaller buttons on mobile — still tappable */
   .header-btn {
     width: 34px;
     height: 34px;
     min-width: 34px;
   }
 
-  /* Cart button: icon-only on mobile to save space */
+  /* Cart: icon only — no text padding */
   .cart-btn {
     width: 34px;
     height: 34px;
     min-width: 34px;
     padding: 0;
     justify-content: center;
-    gap: 0;
   }
 
   .chat-messages__inner {
-    padding: 20px 14px;
-    gap: 16px;
+    padding: 16px 14px;
+    gap: 14px;
   }
 
   .message__bubble {
     max-width: 86%;
+    padding: 11px 13px;
   }
 
-  /* Product grid: single column on mobile */
+  .message__bubble p {
+    font-size: 14px;
+  }
+
   .message__products {
     grid-template-columns: 1fr;
   }
 
   .chat-input-area {
-    padding: 12px 14px 16px;
-    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    padding: 10px 12px 14px;
   }
 
   .chat-input-wrapper {
-    padding: 10px 10px 10px 14px;
-    border-radius: 14px;
+    padding: 9px 9px 9px 13px;
+    border-radius: 13px;
     gap: 8px;
   }
 
@@ -644,11 +641,23 @@
     font-size: 14px;
   }
 
-  .chat-input-hint {
-    font-size: 10px;
+  .chat-voice-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
   }
 
-  /* Chips stay inline — just slightly smaller */
+  .chat-send-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .chat-input-hint {
+    font-size: 10px;
+    margin-top: 6px;
+  }
+
   .suggestion-chip {
     font-size: 12px;
     padding: 7px 11px;
