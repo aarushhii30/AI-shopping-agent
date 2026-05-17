@@ -121,14 +121,15 @@ CURRENT STORE PRODUCTS:
 ${products
   .slice(0, 30)
   .map(
-    (p) => `
+  (p) => `
 Title: ${p.title}
 Price: ${p.priceMin} ${p.currency}
 Type: ${p.type || "General"}
 Available: ${p.available ? "Yes" : "No"}
+Image: ${p.image}
 Product ID: ${p.id}
 `
-  )
+)
   .join("\n")}
 `;
   } catch (err) {
