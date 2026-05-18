@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛍️ Shopping Tracker
+# 🛍️ AI Shopping Agent
 
 ### *Conversational Commerce, Reimagined*
 
@@ -11,17 +11,32 @@
 ![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Express](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 ![Shopify](https://img.shields.io/badge/Shopify-Storefront_API-96BF48?style=for-the-badge&logo=shopify&logoColor=white)
 ![Groq](https://img.shields.io/badge/Groq-Llama_3.1-F55036?style=for-the-badge&logo=meta&logoColor=white)
+![Deployed](https://img.shields.io/badge/Deployed-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 <br/>
 
-> **ShopMind AI** bridges the gap between conversational AI and e-commerce — letting customers discover products through natural dialogue, get personalized recommendations, and complete purchases seamlessly, all within a single chat interface.
+> **AI Shopping Agent** bridges the gap between conversational AI and e-commerce — letting customers discover products through natural dialogue, get personalized recommendations, and complete purchases seamlessly, all within a single chat interface.
+
+<br/>
+
+## 🚀 Live Demo
+
+### 👉 [**ai-shopping-agent-snowy.vercel.app**](https://ai-shopping-agent-snowy.vercel.app)
+
+> ✅ Fully deployed — no setup needed. Open the link and start shopping with AI instantly.
+
+<br/>
 
 </div>
 
 ---
+## 🚀 Demo Video
+
+👉 https://drive.google.com/file/d/13wzsKkM4zSXLNH8ivywKnUF3ICwKjYl_/view?usp=sharing
 
 ## 📌 Table of Contents
 
@@ -30,13 +45,14 @@
 3. [Architecture & Workflow](#-architecture--workflow)
 4. [Tech Stack](#-tech-stack)
 5. [Project Structure](#-project-structure)
-6. [Getting Started](#-getting-started)
-7. [Environment Variables](#-environment-variables)
-8. [Running the App](#-running-the-app)
-9. [AI Chat Workflow](#-ai-chat-workflow)
-10. [Checkout Flow](#-checkout-flow)
-11. [Future Improvements](#-future-improvements)
-12. [Author](#-author)
+6. [Documents](#-documents)
+7. [Getting Started](#-getting-started)
+8. [Environment Variables](#-environment-variables)
+9. [Running the App](#-running-the-app)
+10. [AI Chat Workflow](#-ai-chat-workflow)
+11. [Checkout Flow](#-checkout-flow)
+12. [Future Improvements](#-future-improvements)
+13. [Author](#-author)
 
 ---
 
@@ -44,10 +60,12 @@
 
 | Feature | Description |
 |---|---|
+| 🔐 **Firebase Authentication** | Secure email/password login and signup with JWT session persistence |
 | 🤖 **AI Shopping Agent** | Conversational assistant powered by Groq's Llama 3.1 — understands needs, budget, and preferences |
 | 🛒 **Dynamic Product Discovery** | Real-time product fetching from Shopify Storefront API based on AI-parsed user intent |
 | 💬 **Natural Language Interface** | Users describe what they want in plain English; AI handles the rest |
-| 🎯 **Personalized Recommendations** | Context-aware product suggestions filtered by price range, category, and user preferences |
+| 🎙️ **Voice Input** | Hands-free shopping — speak your query using the built-in Web Speech API assistant |
+| 🎯 **Personalized Recommendations** | Context-aware suggestions with recent search history and category preferences |
 | 🛍️ **Integrated Cart System** | Add, update, and remove items without leaving the chat experience |
 | 💳 **Multi-Step Checkout Flow** | Smooth, guided checkout: Cart → Shipping → Payment → Review → Confirmation |
 | 📦 **Order Management** | Full order review page and order success confirmation with summary |
@@ -55,6 +73,7 @@
 | ⚡ **Low Latency AI** | Groq's ultra-fast inference delivers near-instant AI responses |
 
 ---
+
 ## 📸 Screenshots
 
 <div align="center">
@@ -65,7 +84,7 @@
 
 | AI Chat Interface | Product Recommendations |
 |:-:|:-:|
-| ![Chat UI](screenshots/chat-interface.png) | ![Products](screenshots/product-recommendations.png) |
+|![Chat UI](screenshots/chat-interface-1.png)) | ![Products](screenshots/product-recommendations.png) |
 
 | Cart & Checkout | Order Details |
 |:-:|:-:|
@@ -75,8 +94,6 @@
 |:-:|
 | ![Order Success](screenshots/order-successful.png) |
 
-
-
 </div>
 
 ---
@@ -84,37 +101,47 @@
 ## 🏗️ Architecture & Workflow
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT (React)                           │
-│                                                                 │
-│   ┌──────────┐    ┌──────────────┐    ┌─────────────────────┐  │
-│   │ Chat UI  │───▶│  Cart State  │───▶│  Checkout Flow UI   │  │
-│   └──────────┘    └──────────────┘    └─────────────────────┘  │
-│         │                                                       │
-└─────────┼───────────────────────────────────────────────────────┘
-          │ HTTP / REST (Axios)
-          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    SERVER (Node.js / Express)                   │
-│                                                                 │
-│   ┌─────────────────┐         ┌──────────────────────────────┐ │
-│   │   /api/chat     │────────▶│       Groq API               │ │
-│   │  (AI Handler)   │◀────────│  (Llama 3.1 — Intent Parse,  │ │
-│   └────────┬────────┘         │   Recommendations, Chat)     │ │
-│            │                  └──────────────────────────────┘ │
-│            ▼                                                    │
-│   ┌─────────────────┐         ┌──────────────────────────────┐ │
-│   │ /api/products   │────────▶│    Shopify Storefront API    │ │
-│   │ (Product Fetch) │◀────────│  (Products, Collections,     │ │
-│   └─────────────────┘         │   Variants, Pricing)        │ │
-│                                └──────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                    Auth Layer (Firebase)                         │
+│                                                                  │
+│         [ Login / Signup ] ──▶ JWT Session Persistence          │
+└───────────────────────────────┬──────────────────────────────────┘
+                                │ authenticated user
+                                ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                        CLIENT (React)                            │
+│                                                                  │
+│   ┌──────────┐    ┌──────────────┐    ┌──────────────────────┐  │
+│   │ Chat UI  │───▶│  Cart State  │───▶│   Checkout Flow UI   │  │
+│   │  +Voice  │    │ (CartContext)│    │  (CheckoutContext)   │  │
+│   └──────────┘    └──────────────┘    └──────────────────────┘  │
+└───────────────────────────────┬──────────────────────────────────┘
+                                │ HTTP / REST (Axios)
+                                ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                   SERVER (Node.js / Express)                     │
+│                                                                  │
+│   ┌─────────────────┐         ┌────────────────────────────────┐ │
+│   │   /api/chat     │────────▶│          Groq API              │ │
+│   │  (AI Handler)   │◀────────│  Llama 3.1 — Intent Parse,    │ │
+│   └────────┬────────┘         │  Recommendations, Chat         │ │
+│            │                  └────────────────────────────────┘ │
+│            ▼                                                     │
+│   ┌─────────────────┐         ┌────────────────────────────────┐ │
+│   │ /api/products   │────────▶│    Shopify Storefront API      │ │
+│   │ (Product Fetch) │◀────────│  Products, Collections,        │ │
+│   └─────────────────┘         │  Variants, Pricing             │ │
+│                                └────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### Request Lifecycle
 
 ```
-User types message
+User login/signup (Firebase Auth)
+      │
+      ▼
+User types or speaks a message (Voice / Text)
       │
       ▼
 React sends POST /api/chat
@@ -144,6 +171,8 @@ Express extracts intent via Groq (Llama 3.1)
 |---|---|
 | **React 18** | UI framework with hooks-based state management |
 | **React Router DOM** | Multi-page routing (chat, cart, checkout, order) |
+| **Firebase Auth** | Email/password authentication with JWT session persistence |
+| **Web Speech API** | Browser-native voice input for hands-free querying |
 | **Axios** | HTTP client for API communication |
 | **Lucide React** | Clean, consistent icon library |
 | **CSS (Custom)** | Responsive dark UI with custom animations |
@@ -155,6 +184,12 @@ Express extracts intent via Groq (Llama 3.1)
 | **Express.js** | REST API server and middleware management |
 | **Shopify Storefront API** | GraphQL-powered product, collection & cart data |
 | **Groq API (Llama 3.1)** | Ultra-fast LLM inference for conversational AI |
+
+### Deployment
+| Service | Purpose |
+|---|---|
+| **Vercel** | Frontend deployment with automatic CI/CD |
+| **Render** | Backend API hosting |
 
 ---
 
@@ -181,9 +216,13 @@ shopmind-ai/
 │   │   │   ├── Cart.jsx             # Cart page
 │   │   │   └── Checkout.jsx         # Checkout flow page
 │   │   ├── context/
-│   │   │   └── CartContext.jsx      # Global cart state (React Context)
+│   │   │   ├── AuthContext.jsx      # Firebase auth state management
+│   │   │   ├── CartContext.jsx      # Global cart state (React Context)
+│   │   │   └── CheckoutContext.jsx  # Checkout step state
 │   │   ├── services/
 │   │   │   └── api.js               # Axios API calls
+│   │   ├── utils/
+│   │   │   └── userSession.js       # Search history & personalization
 │   │   ├── styles/
 │   │   │   └── *.css                # Component-level stylesheets
 │   │   ├── App.jsx
@@ -203,10 +242,19 @@ shopmind-ai/
 │   ├── index.js                     # Express app entry point
 │   └── package.json
 │
-├── screenshots/                     # Project screenshots (add yours here)
+├── screenshots/                     # Project screenshots
 ├── .gitignore
 └── README.md
 ```
+
+---
+
+## 📄 Documents
+
+- [Product Document](Aishoppingagent_Product_Documentation.pdf)
+- [Technical Document](AI_Shopping_Agent_Technical_Doc.pdf)
+- [Decision Log](Decisionlog.md)
+- [Contribution](Contribution.md)
 
 ---
 
@@ -220,6 +268,7 @@ Ensure you have the following installed:
 - **npm** v9 or higher
 - A **Shopify store** with Storefront API access — [Get started](https://shopify.dev/docs/api/storefront)
 - A **Groq API key** — [Get yours free](https://console.groq.com/)
+- A **Firebase project** — [Get started](https://console.firebase.google.com/)
 
 ### Installation
 
@@ -296,7 +345,7 @@ npm run dev
 The AI shopping assistant uses a structured pipeline to convert natural language into relevant product recommendations:
 
 ```
-Step 1 — User Input
+Step 1 — User Input (Text or Voice)
   User: "I'm looking for a birthday gift under ₹2000, something for a fitness lover"
 
 Step 2 — Intent Extraction (Groq / Llama 3.1)
@@ -334,7 +383,7 @@ The checkout experience is broken into clear, guided steps to minimize friction:
 |---|---|
 | **1. Cart Review** | View all items, adjust quantities, see total pricing |
 | **2. Shipping Info** | Enter name, address, city, state, and postal code |
-| **3. Payment UI** | Secure card input form with CVV and expiry fields |
+| **3. Payment UI** | Secure card input form with CVV, expiry, UPI, Apple Pay, Google Pay |
 | **4. Order Review** | Full summary of items, shipping details, and total cost |
 | **5. Order Success** | Confirmation page with order ID, summary, and next steps |
 
@@ -342,13 +391,13 @@ The checkout experience is broken into clear, guided steps to minimize friction:
 
 ## 🔮 Future Improvements
 
-- [ ] 🔐 **User Authentication** — Login/signup with persistent order history
+- [x] 🔐 **User Authentication** — Login/signup with Firebase Auth ✅ Shipped
+- [x] 🎙️ **Voice Input** — Talk to the shopping assistant using speech recognition ✅ Shipped
 - [ ] 💾 **Conversation Persistence** — Save and reload past chat sessions
 - [ ] 🌐 **Multi-language Support** — AI responses in Hindi, Spanish, etc.
 - [ ] 📊 **Analytics Dashboard** — Track most-asked queries and popular products
 - [ ] 🔎 **Advanced Filtering** — Filter by ratings, brands, color, and size in chat
 - [ ] 📱 **PWA Support** — Installable mobile app experience
-- [ ] 🎙️ **Voice Input** — Talk to the shopping assistant using speech recognition
 - [ ] 🧠 **Fine-tuned Model** — Custom Llama fine-tune on product catalog data
 - [ ] 📦 **Real Order Processing** — Full Shopify Checkout API integration for live orders
 - [ ] 🔔 **Push Notifications** — Order updates and abandoned cart reminders
@@ -359,11 +408,14 @@ The checkout experience is broken into clear, guided steps to minimize friction:
 
 <div align="center">
 
-**Built with ❤️ by Aarushi Sharma**
+**Built with ❤️ by Aarushi Sharma and MD. Khustar Noorani**
+
+*Submitted for Shopify AI Shopping Hackathon 2026 · KIIT Bhubaneswar*
 
 [![GitHub](https://img.shields.io/badge/GitHub-@your--username-181717?style=for-the-badge&logo=github)](https://github.com/your-username)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/your-profile)
 [![Portfolio](https://img.shields.io/badge/Portfolio-Visit-FF5722?style=for-the-badge&logo=firefox)](https://your-portfolio.dev)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit-6c63ff?style=for-the-badge&logo=vercel)](https://ai-shopping-agent-snowy.vercel.app)
 
 *Open to full-stack, AI/ML, and product engineering roles.*
 
@@ -371,14 +423,12 @@ The checkout experience is broken into clear, guided steps to minimize friction:
 
 ---
 
-
-
----
-
 <div align="center">
 
 *If you found this project helpful, please consider giving it a ⭐ on GitHub — it helps a lot!*
 
-**ShopMind AI** · Built with React, Node.js, Groq, and Shopify Storefront API
+**AI Shopping Agent** · Built with React, Node.js, Groq, Shopify Storefront API, and Firebase
+
+🔗 **[Try it live → ai-shopping-agent-snowy.vercel.app](https://ai-shopping-agent-snowy.vercel.app)**
 
 </div>
