@@ -84,7 +84,7 @@
 
 | AI Chat Interface | Product Recommendations |
 |:-:|:-:|
-| ![Chat UI](![Chat UI](screenshots/chat-interface-1.png)) | ![Products](screenshots/product-recommendations.png) |
+|![Chat UI](screenshots/chat-interface-1.png)) | ![Products](screenshots/product-recommendations.png) |
 
 | Cart & Checkout | Order Details |
 |:-:|:-:|
